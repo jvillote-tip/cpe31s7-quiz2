@@ -1,0 +1,31 @@
+---
+- name: Plays for target VM
+  hosts: target
+  vars_files:
+    - password.yaml
+
+  tasks:
+
+  - name: Change motd in '/etc/motd'
+    ansible.builtin.lineinfile:
+      path: '/etc/motd'
+      line: 'Ansible Managed by 1811326'
+      state: present
+
+  - name: Create a user name jvillote-tip with a password
+    user:
+      name: jvillote-tip
+      password: "{{ password |password_hash('sha512') }}"
+      shell: /bin/bash
+      state: present
+
+  - name: Making the user jvillote-tip a passwordless sudoer user
+    ansible.builtin.lineinfile:
+      path: '/etc/sudoers'
+      line: 'jvillote-tip ALL=(ALL) NOPASSWD: ALL'
+      state: present
+
+  - name: Create a group named 'sysad2'
+    ansible.builtin.group:
+      name: sysad2
+      state: present
